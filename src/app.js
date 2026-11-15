@@ -1,6 +1,8 @@
 import { listProducts, listMovements, saveProduct } from './inventory/database.js';
 import { formatMoney, stockStatus, validateProduct } from './inventory/validation.js';
 import { Scanner } from './scanner/scanner.js';
+import { setupSales } from './sales/sales.js';
+import { setupReports } from './reports/reports.js';
 
 const $ = selector => document.querySelector(selector);
 const form = $('#product-form');
@@ -8,6 +10,7 @@ const dialog = $('#product-dialog');
 const search = $('#search');
 const filter = $('#filter');
 const scanner = new Scanner($('#scanner-dialog'), $('#scanner-video'), $('#scanner-message'));
+const renderReports = setupReports();
 let products = [];
 let editing = null;
 let saving = false;
@@ -140,4 +143,22 @@ form.addEventListener('submit', async event => {
 });
 
 window.addEventListener('focus', refresh);
+const sales = setupSales({ getProducts: () => products, refresh, scanner, onSaved: renderReports });
+
+function navigate() {
+  const section = ['inventario', 'ventas', 'reportes'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'inventario';
+  for (const name of ['inventario', 'ventas', 'reportes']) {
+    document.getElementById(name).hidden = name !== section;
+  }
+  document.querySelector('.topbar h1').textContent = { inventario: 'Inventario', ventas: 'Ventas', reportes: 'Reportes' }[section];
+  document.querySelectorAll('.sidebar a[href^="#"], .mobile-nav a').forEach(link => {
+    link.classList.toggle('nav-active', link.getAttribute('href') === `#${section}`);
+    if (link.getAttribute('href') === `#${section}`) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  });
+  if (section === 'ventas') { refresh().then(sales.renderResults); }
+  if (section === 'reportes') renderReports();
+}
+window.addEventListener('hashchange', navigate);
+navigate();
 refresh();

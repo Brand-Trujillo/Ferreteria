@@ -19,7 +19,7 @@ export function validateProduct(data) {
 }
 
 export function stockStatus(product) {
-  if (product.stock === 0) return 'empty';
+  if (product.stock <= 0) return 'empty';
   return product.stock <= product.minimum ? 'low' : 'ok';
 }
 
