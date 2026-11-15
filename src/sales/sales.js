@@ -82,15 +82,19 @@ export function setupSales({ getProducts, refresh, scanner, onSaved }) {
   }
 
   function values() {
-    const payments = {};
-    for (const name of Object.keys(methods)) {
-      const raw = form.elements[name].value.trim();
-      if (!/^\d+$/.test(raw) || !Number.isSafeInteger(Number(raw)) || Number(raw) > 999999999999) throw new Error('Ingresa valores enteros válidos en todos los medios de pago.');
-      payments[name] = Number(raw);
+    function amount(name, label) {
+      const input = form.elements[name];
+      const raw = input.value.trim();
+      if (input.validity.badInput || (raw !== '' && (!/^\d+$/.test(raw) || !Number.isSafeInteger(Number(raw)) || Number(raw) > 999999999999))) {
+        throw new Error(`Ingresa un valor válido en ${label}, en pesos enteros y sin puntos ni comas.`);
+      }
+      return raw === '' ? 0 : Number(raw);
     }
-    const raw = form.elements.tendered.value.trim();
-    if (!/^\d+$/.test(raw) || !Number.isSafeInteger(Number(raw)) || Number(raw) > 999999999999) throw new Error('Ingresa el efectivo recibido sin decimales.');
-    const tendered = Number(raw);
+    const payments = {};
+    for (const [name, label] of Object.entries(methods)) {
+      payments[name] = amount(name, label);
+    }
+    const tendered = amount('tendered', 'Efectivo recibido');
     const paid = Object.values(payments).reduce((a, b) => a + b, 0);
     if (!Number.isSafeInteger(paid) || paid > total()) throw new Error('Los pagos aplicados no pueden superar el total de la venta.');
     if (tendered < payments.cash) throw new Error('El efectivo recibido no puede ser menor al efectivo aplicado.');
@@ -129,7 +133,10 @@ export function setupSales({ getProducts, refresh, scanner, onSaved }) {
     updatePaymentSummary();
     $('#checkout-dialog').showModal();
   });
-  form.addEventListener('input', updatePaymentSummary);
+  form.addEventListener('input', () => {
+    $('#checkout-error').textContent = '';
+    updatePaymentSummary();
+  });
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (saving) return;
