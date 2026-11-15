@@ -4,8 +4,8 @@ let databasePromise;
 export function openDatabase() {
   if (!databasePromise) {
     databasePromise = new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, 2);
-      request.onupgradeneeded = () => {
+      const request = indexedDB.open(DB_NAME, 4);
+      request.onupgradeneeded = event => {
         const db = request.result;
         if (!db.objectStoreNames.contains('products')) {
           const products = db.createObjectStore('products', { keyPath: 'id' });
@@ -15,6 +15,16 @@ export function openDatabase() {
         }
         if (!db.objectStoreNames.contains('sales')) db.createObjectStore('sales', { keyPath: 'id' });
         if (!db.objectStoreNames.contains('cashEntries')) db.createObjectStore('cashEntries', { keyPath: 'id' });
+        if (event.oldVersion < 3) {
+          request.transaction.objectStore('sales').createIndex('cashSessionId', 'cashSessionId');
+          request.transaction.objectStore('cashEntries').createIndex('cashSessionId', 'cashSessionId');
+          db.createObjectStore('cashSessions', { keyPath: 'id' });
+        }
+        if (event.oldVersion < 4) {
+          const payments = db.createObjectStore('creditPayments', { keyPath: 'id' });
+          payments.createIndex('saleId', 'saleId');
+          payments.createIndex('cashSessionId', 'cashSessionId');
+        }
       };
       request.onsuccess = () => {
         const db = request.result;

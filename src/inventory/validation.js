@@ -1,7 +1,10 @@
+import { parseInteger } from '../common/numbers.js';
+
 export function validateProduct(data) {
   const name = String(data.get('name') ?? '').trim();
   const barcode = String(data.get('barcode') ?? '').trim();
   const supplier = String(data.get('supplier') ?? '').trim();
+  const category = String(data.get('category') ?? '').trim();
   if (!name) throw new Error('Escribe el nombre del producto.');
   const numbers = {};
   for (const [field, label, max] of [
@@ -9,13 +12,13 @@ export function validateProduct(data) {
     ['stock', 'cantidad en stock', 999999999], ['minimum', 'stock mínimo', 999999999]
   ]) {
     const raw = String(data.get(field) ?? '').trim();
-    const value = Number(raw);
-    if (!/^\d+$/.test(raw) || !Number.isSafeInteger(value) || value > max) {
+    try {
+      numbers[field] = parseInteger(raw, { max });
+    } catch {
       throw new Error(`Ingresa un ${label} válido, sin decimales.`);
     }
-    numbers[field] = value;
   }
-  return { name, barcode, supplier, ...numbers };
+  return { name, barcode, supplier, category, ...numbers };
 }
 
 export function stockStatus(product) {

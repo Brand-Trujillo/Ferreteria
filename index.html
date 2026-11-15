@@ -4,26 +4,30 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#14243a">
-  <meta name="description" content="Inventario para ferretería">
+  <meta name="description" content="Inventario de Ferrelectricos Cobos">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles/app.css">
-  <title>Ferretería · Inventario</title>
+  <title>Ferrelectricos Cobos · Ventas</title>
 </head>
 <body>
   <div class="shell">
     <aside class="sidebar">
-      <a class="brand" href="#inicio"><span class="brand-icon">F</span><span>Mi ferretería<small>Tu negocio, bajo control</small></span></a>
+      <a class="brand" href="#ventas"><span class="brand-icon">F</span><span>Ferrelectricos Cobos<small>By Megabyte</small></span></a>
       <div class="sidebar-label">ESPACIO DE TRABAJO</div>
-      <a class="nav-active" href="#inventario"><span aria-hidden="true">▦</span> Inventario</a>
-      <a class="nav-link" href="#ventas"><span aria-hidden="true">▤</span> Ventas</a>
+      <a class="nav-active" href="#ventas" aria-current="page"><span aria-hidden="true">▤</span> Ventas</a>
+      <a class="nav-link" href="#inventario"><span aria-hidden="true">▦</span> Inventario</a>
+      <a class="nav-link" href="#caja"><span aria-hidden="true">▣</span> Caja</a>
+      <a class="nav-link" href="#creditos"><span aria-hidden="true">▧</span> Fiados</a>
       <a class="nav-link" href="#reportes"><span aria-hidden="true">◫</span> Reportes</a>
+      <a class="nav-link" href="#herramientas"><span aria-hidden="true">⚙</span> Herramientas</a>
       <div class="sidebar-bottom">Una herramienta hecha para tu negocio <span>✦</span></div>
     </aside>
     <main id="inicio">
-      <header class="topbar"><div><span class="eyebrow">TU ESPACIO DE TRABAJO</span><h1>Inventario</h1></div><div class="top-badge"><span></span> Primera versión</div></header>
-      <nav class="mobile-nav" aria-label="Secciones"><a href="#inventario">Inventario</a><a href="#ventas">Ventas</a><a href="#reportes">Reportes</a></nav>
-      <div class="content" id="inventario">
+      <div class="compact-brand"><a href="#ventas"><span class="compact-brand-icon" aria-hidden="true">F</span><span>Ferrelectricos Cobos<small>By Megabyte</small></span></a></div>
+      <header class="topbar"><div><span class="eyebrow">TU ESPACIO DE TRABAJO</span><h1>Ventas</h1></div><div class="top-actions"><button type="button" class="connection-button" id="connection-button" aria-haspopup="dialog"><span class="connection-dot" aria-hidden="true"></span><span id="connection-label">Estado</span></button><div class="top-badge"><span></span> Primera versión</div></div></header>
+      <nav class="mobile-nav" aria-label="Secciones"><a href="#ventas" class="nav-active" aria-current="page">Ventas</a><a href="#inventario">Inventario</a><a href="#caja">Caja</a><a href="#creditos">Fiados</a><a href="#reportes">Reportes</a><a href="#herramientas">Más</a></nav>
+      <div class="content" id="inventario" hidden>
         <div class="notice" role="note"><strong>Versión inicial · Datos de este dispositivo</strong><span>El inventario se guarda solo en este navegador. Aún no hay sincronización, usuarios ni copias de seguridad; no lo uses como registro único del negocio.</span></div>
         <section class="hero">
           <div><span class="hero-kicker">TU INVENTARIO, MÁS SIMPLE</span><h2>Todo en su lugar.<br><em>Tu negocio en marcha.</em></h2><p>Encuentra tus productos, revisa existencias y mantén todo organizado desde un solo lugar.</p><button class="button button-light" id="new-product" type="button"><span>＋</span> Agregar producto</button></div>
@@ -40,11 +44,11 @@
           <div class="product-list" id="product-list" aria-live="polite"></div>
         </section>
       </div>
-      <div class="content" id="ventas" hidden>
+      <div class="content" id="ventas">
         <div class="notice" role="note"><strong>Ventas de prueba · Solo este dispositivo</strong><span>Sin sincronización, usuarios ni permisos. No uses datos reales ni lo consideres una caja compartida.</span></div>
         <section class="inventory-panel">
           <div class="section-heading"><div><span class="eyebrow">ATENCIÓN RÁPIDA</span><h2>Nueva venta</h2><p>Busca los productos y agrégalos a la venta.</p></div></div>
-          <div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="sale-search" type="search" placeholder="Nombre o código de barras" aria-label="Buscar producto para venta"></label><button class="button button-outline" id="sale-scan" type="button">▥ Escanear</button></div>
+          <div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="sale-search" type="search" placeholder="Nombre o código de barras" aria-label="Buscar producto para venta"></label><button class="button button-outline" id="sale-scan" type="button">▥ Escanear</button><select id="sale-category" aria-label="Filtrar por categoría"><option value="">Todas las categorías</option></select><button class="button button-outline" type="button" id="sale-favorites" aria-pressed="false">☆ Favoritos</button></div>
           <div id="sale-results" class="sale-results" aria-live="polite"></div>
         </section>
         <section class="inventory-panel sale-panel">
@@ -53,6 +57,36 @@
           <div class="sale-total"><span>Total a pagar</span><strong id="sale-total">$ 0</strong></div>
           <p class="form-intro">Si no hay suficiente stock, podrás confirmar la venta de prueba y quedará señalado en el historial.</p>
           <button class="button button-primary full-button" id="checkout" type="button">Continuar al cobro</button>
+        </section>
+      </div>
+      <div class="content" id="caja" hidden>
+        <div class="notice" role="note"><strong>Caja de prueba · Solo este dispositivo</strong><span>Esta caja no se comparte entre celulares y todavía no existen permisos de administrador. No la uses como registro real del negocio.</span></div>
+        <section class="inventory-panel">
+          <div class="section-heading"><div><span class="eyebrow">CONTROL DE EFECTIVO</span><h2>Caja</h2><p>Abre la caja, revisa el efectivo y registra el cierre.</p></div></div>
+          <div id="cash-state" role="status" class="cash-state"></div>
+          <p id="cash-error" class="error" role="alert"></p>
+          <form id="open-cash-form" class="cash-form">
+            <label>Efectivo inicial en pesos<input type="text" name="opening" data-integer inputmode="numeric" required placeholder="Ej. 50.000"></label>
+            <button type="submit" class="button button-primary">Abrir caja</button>
+          </form>
+          <div id="cash-current" hidden>
+            <div id="cash-summary" class="report-grid"></div>
+            <p class="form-intro">El efectivo esperado incluye solo pagos en efectivo y movimientos marcados como efectivo de caja. Los demás medios y saldos a crédito no aumentan el efectivo.</p>
+            <form id="close-cash-form" class="cash-form">
+              <label>Efectivo contado al cierre<input type="text" name="counted" data-integer inputmode="numeric" required placeholder="Cuenta el dinero en caja"></label>
+              <button type="submit" class="button button-primary">Cerrar caja</button>
+            </form>
+          </div>
+          <h3 class="subheading">Cierres anteriores</h3><div id="cash-history"></div>
+        </section>
+      </div>
+      <div class="content" id="creditos" hidden>
+        <div class="notice" role="note"><strong>Fiados de prueba · Solo este dispositivo</strong><span>Los saldos no están sincronizados ni protegidos por permisos. No los uses como registro real.</span></div>
+        <section class="inventory-panel">
+          <div class="section-heading"><div><span class="eyebrow">CLIENTES Y CRÉDITOS</span><h2>Fiados y abonos</h2><p>Consulta los saldos de ventas a crédito y registra abonos.</p></div></div>
+          <label class="search credit-search"><span aria-hidden="true">⌕</span><input id="credit-search" type="search" placeholder="Buscar por cliente" aria-label="Buscar fiados por cliente"></label>
+          <p id="credit-error" class="error" role="alert"></p>
+          <div id="credit-list" aria-live="polite"></div>
         </section>
       </div>
       <div class="content" id="reportes" hidden>
@@ -64,16 +98,59 @@
           <form id="entry-form" class="entry-form">
             <label>Tipo<select name="type"><option value="expense">Gasto</option><option value="income">Ingreso</option></select></label>
             <label>Concepto<input name="description" required maxlength="120" placeholder="Ej. Arriendo"></label>
-            <label>Valor en pesos<input name="amount" type="number" min="1" max="999999999999" step="1" inputmode="numeric" required></label>
+            <label>Valor en pesos<input name="amount" type="text" data-integer inputmode="numeric" required></label>
+            <label class="cash-checkbox"><input type="checkbox" name="affectsCash"> Este movimiento entra o sale del efectivo de caja</label>
             <button type="submit" class="button button-primary">Registrar</button>
           </form>
           <p id="entry-error" class="error" role="alert"></p>
           <h3 class="subheading">Movimientos del periodo</h3><div id="report-list" aria-live="polite"></div>
         </section>
       </div>
+      <div class="content" id="herramientas" hidden>
+        <div class="notice" role="note"><strong>Herramientas de prueba · Solo este dispositivo</strong><span>Aún no hay usuarios ni permisos. Las copias contienen información del negocio y deben guardarse en un lugar seguro.</span></div>
+        <section class="inventory-panel">
+          <div class="section-heading"><div><span class="eyebrow">PROTEGE TU INFORMACIÓN</span><h2>Copia de seguridad</h2><p>Descarga los datos guardados en este navegador en un archivo JSON.</p></div></div>
+          <p class="form-intro">La copia incluye inventario, ventas, movimientos y caja. No se envía a ningún servidor. La restauración aún no está disponible.</p>
+          <button type="button" class="button button-primary" id="backup-download">Descargar copia</button>
+          <p id="backup-status" class="form-intro" role="status"></p>
+        </section>
+        <section class="inventory-panel sale-panel">
+          <div class="section-heading"><div><span class="eyebrow">CONSULTA RÁPIDA</span><h2>¿Qué hace falta?</h2><p>Consulta el inventario de este dispositivo, sin enviar datos por internet.</p></div></div>
+          <p class="form-intro">Es una consulta automática de stock, todavía no es el asistente de IA ni incluye voz.</p>
+          <button type="button" class="button button-outline" id="stock-check">Ver productos bajos o agotados</button>
+          <div id="stock-check-results" aria-live="polite"></div>
+        </section>
+        <section class="inventory-panel sale-panel">
+          <div class="section-heading"><div><span class="eyebrow">ACCESO SIN CONEXIÓN</span><h2>Aplicación en el celular</h2><p>La app puede guardar sus archivos para abrirlos sin internet después de la primera visita.</p></div></div>
+          <p class="form-intro" id="offline-status" role="status">Comprobando disponibilidad sin conexión…</p>
+          <p class="form-intro">En Android con Chrome puedes buscar «Instalar aplicación» o «Añadir a pantalla de inicio» en el menú. Depende del dispositivo y de una conexión segura.</p>
+        </section>
+      </div>
       <footer>Hecho para que tu negocio siga creciendo <span>✦</span></footer>
     </main>
   </div>
+  <dialog id="credit-dialog" aria-labelledby="credit-title">
+    <form id="credit-form">
+      <div class="dialog-heading"><div><span class="eyebrow">FIADOS</span><h2 id="credit-title">Registrar abono</h2></div><button class="icon-button" type="button" data-close="credit-dialog" aria-label="Cerrar">×</button></div>
+      <p class="form-intro" id="credit-description"></p>
+      <div class="form-grid">
+        <label>Monto del abono<input name="amount" type="text" data-integer inputmode="numeric" required placeholder="0"></label>
+        <label>Medio de pago<select name="method"><option value="cash">Efectivo</option><option value="nequi">Nequi</option><option value="daviplata">Daviplata</option><option value="qr">QR</option><option value="card">Tarjeta</option><option value="breb">Bre-B o llave</option></select></label>
+      </div>
+      <p class="form-intro">Para registrar un abono la caja debe estar abierta. Los abonos en efectivo se suman al cierre.</p>
+      <p id="credit-form-error" class="error" role="alert"></p>
+      <div class="form-actions"><button class="button button-outline" type="button" data-close="credit-dialog">Cancelar</button><button class="button button-primary" type="submit">Guardar abono</button></div>
+    </form>
+  </dialog>
+  <dialog id="connection-dialog" aria-labelledby="connection-title">
+    <div class="dialog-heading"><div><span class="eyebrow">ESTADO DE LA APP</span><h2 id="connection-title">Conexión y sincronización</h2></div><button class="icon-button" type="button" data-close="connection-dialog" aria-label="Cerrar">×</button></div>
+    <div class="connection-detail" aria-live="polite">
+      <p><strong>Conexión:</strong> <span id="connection-detail"></span></p>
+      <p><strong>Sincronización:</strong> no disponible todavía.</p>
+      <p>Los datos se guardan únicamente en este navegador. Estar en línea no significa que estén sincronizados con otros dispositivos.</p>
+    </div>
+    <button class="button button-outline" type="button" data-close="connection-dialog">Entendido</button>
+  </dialog>
   <dialog id="product-dialog">
     <form id="product-form">
       <div class="dialog-heading"><div><span class="eyebrow">INVENTARIO</span><h2 id="form-title">Agregar producto</h2></div><button class="icon-button" type="button" data-close="product-dialog" aria-label="Cerrar">×</button></div>
@@ -81,11 +158,12 @@
       <div class="form-grid">
         <label class="wide">Nombre del producto <input name="name" required maxlength="120" placeholder="Ej. Martillo de acero"></label>
         <label class="wide">Código de barras <span class="input-action"><input name="barcode" maxlength="80" placeholder="Escribe, escanea o deja vacío" autocomplete="off"><button type="button" id="scan-product" aria-label="Escanear código de barras">▥</button></span><small>Opcional. No se permiten códigos repetidos.</small></label>
-        <label>Precio de compra <span class="money-input"><span>$</span><input name="cost" type="number" min="0" max="999999999999" step="1" required inputmode="numeric" placeholder="0"></span></label>
-        <label>Precio de venta <span class="money-input"><span>$</span><input name="price" type="number" min="0" max="999999999999" step="1" required inputmode="numeric" placeholder="0"></span></label>
-        <label>Cantidad en stock <input name="stock" type="number" min="0" max="999999999" step="1" required inputmode="numeric" placeholder="0"></label>
-        <label>Stock mínimo <input name="minimum" type="number" min="0" max="999999999" step="1" required inputmode="numeric" placeholder="0"></label>
+        <label>Precio de compra <span class="money-input"><span>$</span><input name="cost" type="text" data-integer required inputmode="numeric" placeholder="0"></span></label>
+        <label>Precio de venta <span class="money-input"><span>$</span><input name="price" type="text" data-integer required inputmode="numeric" placeholder="0"></span></label>
+        <label>Cantidad en stock <input name="stock" type="text" data-integer required inputmode="numeric" placeholder="0"></label>
+        <label>Stock mínimo <input name="minimum" type="text" data-integer required inputmode="numeric" placeholder="0"></label>
         <label class="wide">Proveedor <input name="supplier" maxlength="120" placeholder="Opcional"></label>
+        <label class="wide">Categoría <input name="category" maxlength="80" placeholder="Ej. Herramientas, electricidad o tornillería"></label>
         <label class="wide" id="reason-field" hidden>Motivo del cambio de stock <input name="reason" maxlength="200" placeholder="Ej. Llegó mercancía"></label>
       </div>
       <p id="form-error" class="error" role="alert"></p>
@@ -107,16 +185,15 @@
   <dialog id="checkout-dialog">
     <form id="checkout-form">
       <div class="dialog-heading"><div><span class="eyebrow">FINALIZAR VENTA</span><h2>Registrar pago</h2></div><button class="icon-button" type="button" data-close="checkout-dialog" aria-label="Cerrar">×</button></div>
-      <p class="form-intro">Ingresa el valor en los medios usados, sin puntos ni comas. Puedes dejar los demás vacíos o en cero. Si queda saldo pendiente, se registrará como crédito de prueba.</p>
+      <p class="form-intro">Ingresa el efectivo recibido y los demás medios utilizados. El efectivo aplicado y las vueltas se calculan automáticamente. Si queda saldo pendiente, será un crédito de prueba.</p>
       <div id="checkout-total" class="sale-total"></div>
       <div class="form-grid payment-grid">
-        <label>Efectivo aplicado<input name="cash" type="number" min="0" max="999999999999" step="1" inputmode="numeric" value="0"></label>
-        <label>Efectivo recibido<input name="tendered" type="number" min="0" max="999999999999" step="1" inputmode="numeric" value="0"></label>
-        <label>Nequi<input name="nequi" type="number" min="0" max="999999999999" step="1" inputmode="numeric" value="0"></label>
-        <label>Daviplata<input name="daviplata" type="number" min="0" max="999999999999" step="1" inputmode="numeric" value="0"></label>
-        <label>QR<input name="qr" type="number" min="0" max="999999999999" step="1" inputmode="numeric" value="0"></label>
-        <label>Tarjeta<input name="card" type="number" min="0" max="999999999999" step="1" inputmode="numeric" value="0"></label>
-        <label>Bre-B o llave<input name="breb" type="number" min="0" max="999999999999" step="1" inputmode="numeric" value="0"></label>
+        <label>Efectivo recibido<input name="tendered" type="text" data-integer inputmode="numeric" placeholder="0"></label>
+        <label>Nequi<input name="nequi" type="text" data-integer inputmode="numeric" placeholder="0"></label>
+        <label>Daviplata<input name="daviplata" type="text" data-integer inputmode="numeric" placeholder="0"></label>
+        <label>QR<input name="qr" type="text" data-integer inputmode="numeric" placeholder="0"></label>
+        <label>Tarjeta<input name="card" type="text" data-integer inputmode="numeric" placeholder="0"></label>
+        <label>Bre-B o llave<input name="breb" type="text" data-integer inputmode="numeric" placeholder="0"></label>
         <label>Cliente (para crédito)<input name="customer" maxlength="120" placeholder="Nombre del cliente"></label>
         <label>Fecha límite (para crédito)<input name="dueDate" type="date"></label>
       </div>

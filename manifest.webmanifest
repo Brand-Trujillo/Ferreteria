@@ -1,13 +1,15 @@
 {
-  "name": "Mi ferretería",
-  "short_name": "Ferretería",
-  "description": "Inventario para ferretería",
+  "name": "Ferrelectricos Cobos",
+  "short_name": "Cobos",
+  "description": "Inventario de Ferrelectricos Cobos",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f4f6f9",
   "theme_color": "#14243a",
   "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }

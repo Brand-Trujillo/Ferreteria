@@ -1,5 +1,7 @@
 import { formatMoney } from '../inventory/validation.js';
 import { registerSale } from './storage.js';
+import { saveProduct } from '../inventory/database.js';
+import { formatInteger, parseInteger, setupIntegerInput } from '../common/numbers.js';
 
 const methods = { cash: 'Efectivo', nequi: 'Nequi', daviplata: 'Daviplata', qr: 'QR', card: 'Tarjeta', breb: 'Bre-B o llave' };
 const $ = selector => document.querySelector(selector);
@@ -16,21 +18,29 @@ export function setupSales({ getProducts, refresh, scanner, onSaved }) {
   let receipt = '';
   const form = $('#checkout-form');
   const search = $('#sale-search');
+  const category = $('#sale-category');
+  const favorites = $('#sale-favorites');
 
   function renderResults() {
     const target = $('#sale-results');
     target.replaceChildren();
     const query = search.value.trim().toLocaleLowerCase('es');
-    if (!query) {
-      target.append(make('p', 'form-intro', 'Escribe un nombre o código, o usa el escáner.'));
+    const selectedCategory = category.value;
+    const categories = [...new Set(getProducts().map(p => p.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+    category.replaceChildren(new Option('Todas las categorías', ''));
+    for (const name of categories) category.add(new Option(name, name));
+    category.value = categories.includes(selectedCategory) ? selectedCategory : '';
+    const favoritesOnly = favorites.getAttribute('aria-pressed') === 'true';
+    if (!query && !category.value && !favoritesOnly) {
+      target.append(make('p', 'form-intro', 'Escribe un nombre o código, usa el escáner o consulta tus favoritos.'));
       return;
     }
-    const matches = getProducts().filter(p => p.name.toLocaleLowerCase('es').includes(query) || (p.barcode || '').toLocaleLowerCase('es').includes(query)).slice(0, 20);
+    const matches = getProducts().filter(p => (p.name.toLocaleLowerCase('es').includes(query) || (p.barcode || '').toLocaleLowerCase('es').includes(query)) && (!category.value || p.category === category.value) && (!favoritesOnly || p.favorite)).slice(0, 20);
     if (!matches.length) target.append(make('p', 'form-intro', 'No encontramos productos con esa búsqueda.'));
     for (const product of matches) {
       const row = make('div', 'sale-result');
       const info = make('div');
-      info.append(make('strong', '', product.name), make('small', '', `${formatMoney(product.price)} · Stock: ${product.stock}`));
+      info.append(make('strong', '', product.name), make('small', '', `${formatMoney(product.price)} · Stock: ${product.stock}${product.category ? ` · ${product.category}` : ''}`));
       const add = make('button', 'button button-outline small-button', '＋ Agregar');
       add.type = 'button';
       add.addEventListener('click', () => {
@@ -38,7 +48,21 @@ export function setupSales({ getProducts, refresh, scanner, onSaved }) {
         cart.set(product.id, { id: product.id, name: product.name, price: product.price, quantity: (current?.quantity || 0) + 1 });
         renderCart();
       });
-      row.append(info, add);
+      const star = make('button', 'text-button favorite-button', product.favorite ? '★' : '☆');
+      star.type = 'button';
+      star.setAttribute('aria-label', `${product.favorite ? 'Quitar de' : 'Agregar a'} favoritos: ${product.name}`);
+      star.addEventListener('click', async () => {
+        star.disabled = true;
+        try {
+          await saveProduct({ ...product, favorite: !product.favorite }, '');
+          await refresh();
+          renderResults();
+        } catch (error) {
+          target.prepend(make('p', 'error', `No se pudo actualizar el favorito: ${error.message}`));
+          star.disabled = false;
+        }
+      });
+      row.append(info, star, add);
       target.append(row);
     }
   }
@@ -56,21 +80,24 @@ export function setupSales({ getProducts, refresh, scanner, onSaved }) {
       const info = make('div', 'cart-name');
       info.append(make('strong', '', item.name), make('small', '', `${formatMoney(item.price)} por unidad`));
       const quantity = make('input', 'quantity');
-      quantity.type = 'number';
-      quantity.min = '1';
-      quantity.max = '999999';
-      quantity.step = '1';
-      quantity.value = item.quantity;
+      quantity.type = 'text';
+      quantity.inputMode = 'numeric';
+      quantity.value = formatInteger(item.quantity);
+      setupIntegerInput(quantity);
       quantity.setAttribute('aria-label', `Cantidad de ${item.name}`);
       quantity.addEventListener('change', () => {
-        const n = Number(quantity.value);
-        if (!Number.isSafeInteger(n) || n < 1 || n > 999999) {
-          quantity.value = item.quantity;
+        let n;
+        try { n = parseInteger(quantity.value, { min: 1, max: 999999 }); }
+        catch {
+          quantity.setCustomValidity('Ingresa una cantidad entera entre 1 y 999.999.');
+          quantity.reportValidity();
           return;
         }
+        quantity.setCustomValidity('');
         item.quantity = n;
         renderCart();
       });
+      quantity.addEventListener('input', () => quantity.setCustomValidity(''));
       const remove = make('button', 'text-button', 'Quitar');
       remove.type = 'button';
       remove.addEventListener('click', () => { cart.delete(item.id); renderCart(); });
@@ -83,29 +110,26 @@ export function setupSales({ getProducts, refresh, scanner, onSaved }) {
 
   function values() {
     function amount(name, label) {
-      const input = form.elements[name];
-      const raw = input.value.trim();
-      if (input.validity.badInput || (raw !== '' && (!/^\d+$/.test(raw) || !Number.isSafeInteger(Number(raw)) || Number(raw) > 999999999999))) {
-        throw new Error(`Ingresa un valor válido en ${label}, en pesos enteros y sin puntos ni comas.`);
-      }
-      return raw === '' ? 0 : Number(raw);
+      try { return parseInteger(form.elements[name].value, { optional: true }); }
+      catch { throw new Error(`Ingresa un valor válido en ${label}, en pesos enteros.`); }
     }
     const payments = {};
     for (const [name, label] of Object.entries(methods)) {
+      if (name === 'cash') continue;
       payments[name] = amount(name, label);
     }
     const tendered = amount('tendered', 'Efectivo recibido');
-    const paid = Object.values(payments).reduce((a, b) => a + b, 0);
-    if (!Number.isSafeInteger(paid) || paid > total()) throw new Error('Los pagos aplicados no pueden superar el total de la venta.');
-    if (tendered < payments.cash) throw new Error('El efectivo recibido no puede ser menor al efectivo aplicado.');
-    if (payments.cash === 0 && tendered !== 0) throw new Error('Ingresa efectivo aplicado para calcular las vueltas.');
+    const electronic = Object.values(payments).reduce((a, b) => a + b, 0);
+    if (!Number.isSafeInteger(electronic) || electronic > total()) throw new Error('Los pagos electrónicos no pueden superar el total de la venta.');
+    payments.cash = Math.min(tendered, total() - electronic);
+    const paid = electronic + payments.cash;
     return { payments, paid, tendered, change: tendered - payments.cash, balance: total() - paid };
   }
 
   function updatePaymentSummary() {
     try {
       const value = values();
-      $('#payment-summary').textContent = `Pagado: ${formatMoney(value.paid)} · Saldo: ${formatMoney(value.balance)} · Vueltas: ${formatMoney(value.change)}`;
+      $('#payment-summary').textContent = `Efectivo aplicado: ${formatMoney(value.payments.cash)} · Pagado: ${formatMoney(value.paid)} · Saldo: ${formatMoney(value.balance)} · Vueltas: ${formatMoney(value.change)}`;
     } catch (error) {
       $('#payment-summary').textContent = error.message;
     }
@@ -121,8 +145,17 @@ export function setupSales({ getProducts, refresh, scanner, onSaved }) {
   }
 
   search.addEventListener('input', renderResults);
+  category.addEventListener('change', renderResults);
+  favorites.addEventListener('click', () => {
+    const enabled = favorites.getAttribute('aria-pressed') !== 'true';
+    favorites.setAttribute('aria-pressed', String(enabled));
+    favorites.textContent = enabled ? '★ Favoritos' : '☆ Favoritos';
+    renderResults();
+  });
   $('#sale-scan').addEventListener('click', () => scanner.open(code => { search.value = code; renderResults(); }));
   $('#checkout').addEventListener('click', async () => {
+    const invalidQuantity = $('#cart .quantity:invalid');
+    if (invalidQuantity) { invalidQuantity.reportValidity(); return; }
     await refresh();
     if (!cart.size) return;
     if (!Number.isSafeInteger(total())) { alert('El total es demasiado alto. Revisa las cantidades.'); return; }
@@ -162,7 +195,7 @@ export function setupSales({ getProducts, refresh, scanner, onSaved }) {
       renderResults();
       await onSaved();
       receipt = [
-        'MI FERRETERÍA · COMPROBANTE DE PRUEBA',
+        'FERRELECTRICOS COBOS · COMPROBANTE DE PRUEBA',
         new Date(sale.at).toLocaleString('es-CO'),
         `Referencia: ${sale.id}`,
         '',

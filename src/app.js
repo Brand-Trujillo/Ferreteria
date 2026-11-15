@@ -3,6 +3,19 @@ import { formatMoney, stockStatus, validateProduct } from './inventory/validatio
 import { Scanner } from './scanner/scanner.js';
 import { setupSales } from './sales/sales.js';
 import { setupReports } from './reports/reports.js';
+import { setupCash } from './cash/cash.js';
+import { formatInteger, setupIntegerInput } from './common/numbers.js';
+import { setupConnectionStatus } from './common/connection.js';
+import { setupOffline } from './common/offline.js';
+import { setupBackup } from './backup/backup.js';
+import { setupStockCheck } from './inventory/stock-check.js';
+import { setupCredits } from './credits/credits.js';
+
+document.querySelectorAll('[data-integer]').forEach(setupIntegerInput);
+setupConnectionStatus();
+setupOffline();
+setupBackup();
+setupStockCheck();
 
 const $ = selector => document.querySelector(selector);
 const form = $('#product-form');
@@ -11,6 +24,8 @@ const search = $('#search');
 const filter = $('#filter');
 const scanner = new Scanner($('#scanner-dialog'), $('#scanner-video'), $('#scanner-message'));
 const renderReports = setupReports();
+const renderCash = setupCash();
+const renderCredits = setupCredits();
 let products = [];
 let editing = null;
 let saving = false;
@@ -59,7 +74,7 @@ function render() {
     const identity = node('div', 'product-identity');
     const icon = node('span', 'product-icon', '▦');
     const description = node('div', 'product-description');
-    description.append(node('h3', '', product.name), node('p', '', product.barcode ? `Código: ${product.barcode}` : 'Sin código de barras'));
+    description.append(node('h3', '', product.name), node('p', '', `${product.barcode ? `Código: ${product.barcode}` : 'Sin código de barras'}${product.category ? ` · ${product.category}` : ''}`));
     identity.append(icon, description);
     const details = node('div', 'product-details');
     const status = stockStatus(product);
@@ -89,8 +104,8 @@ function openForm(product = null) {
   $('#form-title').textContent = product ? 'Editar producto' : 'Agregar producto';
   $('#reason-field').hidden = !product;
   if (product) {
-    for (const key of ['name', 'barcode', 'cost', 'price', 'stock', 'minimum', 'supplier']) {
-      form.elements[key].value = product[key] ?? '';
+    for (const key of ['name', 'barcode', 'cost', 'price', 'stock', 'minimum', 'supplier', 'category']) {
+      form.elements[key].value = ['cost', 'price', 'stock', 'minimum'].includes(key) ? formatInteger(product[key]) : (product[key] ?? '');
     }
   }
   dialog.showModal();
@@ -131,7 +146,7 @@ form.addEventListener('submit', async event => {
     const validated = validateProduct(new FormData(form));
     saving = true;
     submit.disabled = true;
-    await saveProduct({ ...validated, id: editing?.id || crypto.randomUUID(), version: editing?.version }, form.elements.reason.value.trim());
+    await saveProduct({ ...validated, favorite: editing?.favorite || false, id: editing?.id || crypto.randomUUID(), version: editing?.version }, form.elements.reason.value.trim());
     dialog.close();
     await refresh();
   } catch (error) {
@@ -146,18 +161,23 @@ window.addEventListener('focus', refresh);
 const sales = setupSales({ getProducts: () => products, refresh, scanner, onSaved: renderReports });
 
 function navigate() {
-  const section = ['inventario', 'ventas', 'reportes'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'inventario';
-  for (const name of ['inventario', 'ventas', 'reportes']) {
+  const labels = { inventario: 'Inventario', ventas: 'Ventas', caja: 'Caja', creditos: 'Fiados', reportes: 'Reportes', herramientas: 'Herramientas' };
+  const section = Object.hasOwn(labels, location.hash.slice(1)) ? location.hash.slice(1) : 'ventas';
+  for (const name of Object.keys(labels)) {
     document.getElementById(name).hidden = name !== section;
   }
-  document.querySelector('.topbar h1').textContent = { inventario: 'Inventario', ventas: 'Ventas', reportes: 'Reportes' }[section];
-  document.querySelectorAll('.sidebar a[href^="#"], .mobile-nav a').forEach(link => {
+  document.querySelector('.topbar h1').textContent = labels[section];
+  document.title = `Ferrelectricos Cobos · ${labels[section]}`;
+  document.querySelectorAll('.sidebar a:not(.brand), .mobile-nav a').forEach(link => {
+    if (link.closest('.sidebar')) link.classList.add('nav-link');
     link.classList.toggle('nav-active', link.getAttribute('href') === `#${section}`);
     if (link.getAttribute('href') === `#${section}`) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   });
   if (section === 'ventas') { refresh().then(sales.renderResults); }
   if (section === 'reportes') renderReports();
+  if (section === 'caja') renderCash();
+  if (section === 'creditos') renderCredits();
 }
 window.addEventListener('hashchange', navigate);
 navigate();
