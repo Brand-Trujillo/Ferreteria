@@ -40,6 +40,7 @@
         </section>
         <section class="inventory-panel">
           <div class="section-heading"><div><span class="eyebrow">ORGANIZA TU NEGOCIO</span><h2>Tus productos</h2><p>Busca, consulta y actualiza tu inventario.</p></div><button class="button button-primary" id="new-product-secondary" type="button">＋ <span>Agregar producto</span></button></div>
+          <button class="button button-outline catalog-open" id="open-catalog" type="button">↗ Compartir catálogo</button>
           <div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar por nombre o código..." autocomplete="off" aria-label="Buscar por nombre o código"></label><button class="button button-outline" id="scan-search" type="button">▥ <span>Escanear código</span></button><select id="filter" aria-label="Filtrar productos"><option value="all">Todos los productos</option><option value="low">Stock bajo</option><option value="empty">Agotados</option></select></div>
           <div class="product-list" id="product-list" aria-live="polite"></div>
         </section>
@@ -129,6 +130,20 @@
       <footer>Hecho para que tu negocio siga creciendo <span>✦</span></footer>
     </main>
   </div>
+  <dialog id="catalog-dialog" aria-labelledby="catalog-title">
+    <div class="dialog-heading"><div><span class="eyebrow">COMPARTE TU NEGOCIO</span><h2 id="catalog-title">Crear catálogo</h2></div><button class="icon-button" type="button" data-close="catalog-dialog" aria-label="Cerrar">×</button></div>
+    <p class="form-intro">Selecciona todos, por categoría o uno a uno. Solo se comparten nombres y precios de venta; confirma la disponibilidad con el cliente.</p>
+    <label class="catalog-label" for="catalog-message">Mensaje para tus clientes</label>
+    <textarea id="catalog-message" rows="3" maxlength="500">¡En Ferrelectricos Cobos encuentras lo que necesitas para tus proyectos! Consulta nuestros productos y precios. ¡Escríbenos, será un gusto atenderte!</textarea>
+    <div class="toolbar catalog-toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="catalog-search" type="search" placeholder="Buscar producto..." aria-label="Buscar producto en el catálogo"></label><select id="catalog-category" aria-label="Filtrar catálogo por categoría"><option value="">Todas las categorías</option></select></div>
+    <div class="catalog-selection-actions"><button class="text-button" type="button" id="catalog-select-visible">Seleccionar visibles</button><button class="text-button" type="button" id="catalog-clear-visible">Quitar visibles</button><strong id="catalog-count" role="status">0 seleccionados</strong></div>
+    <div id="catalog-products" class="catalog-products" aria-live="polite"></div>
+    <label class="catalog-label" for="catalog-preview">Vista previa del texto</label>
+    <textarea id="catalog-preview" rows="5" readonly></textarea>
+    <p class="form-intro">Para PDF, elige «Guardar como PDF» en la ventana de impresión y luego envía el archivo. El catálogo es una copia: los cambios de precios no se actualizan automáticamente.</p>
+    <div class="form-actions catalog-actions"><button class="button button-outline" id="catalog-copy" type="button">Copiar texto</button><button class="button button-outline" id="catalog-share" type="button">Compartir texto</button><button class="button button-primary" id="catalog-pdf" type="button">Guardar como PDF</button></div>
+    <p id="catalog-status" class="error" role="status"></p>
+  </dialog>
   <dialog id="credit-dialog" aria-labelledby="credit-title">
     <form id="credit-form">
       <div class="dialog-heading"><div><span class="eyebrow">FIADOS</span><h2 id="credit-title">Registrar abono</h2></div><button class="icon-button" type="button" data-close="credit-dialog" aria-label="Cerrar">×</button></div>

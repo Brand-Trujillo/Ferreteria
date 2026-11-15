@@ -17,6 +17,7 @@ Abrir `http://127.0.0.1:8800/`. Para detener el servidor, presionar Ctrl+C. La c
 - La app abre en la pantalla de ventas; el inventario, la caja y los reportes siguen disponibles desde el menú.
 - Registro y edición de productos por unidad, con o sin código, búsqueda, precios en pesos enteros y alerta de stock.
 - Categoría opcional por producto y favoritos para filtrar rápidamente en la pantalla de ventas.
+- Catálogo con selección de todos los productos, por categoría o individualmente, mensaje editable y precios de venta. Se puede compartir o copiar como texto, o guardar como PDF desde la impresión del navegador para enviarlo después. Incluye agotados si se seleccionan y no incluye costos ni existencias; los precios son una copia que no se actualiza sola.
 - Código de barras único cuando se proporciona, escaneo opcional y búsqueda manual.
 - Historial local de cambios de cantidad, que exige un motivo para cada ajuste.
 - Venta de prueba con búsqueda o escáner, pagos combinados, cálculo de vueltas y registro de saldo a crédito con nombre y fecha.

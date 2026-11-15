@@ -10,12 +10,14 @@ import { setupOffline } from './common/offline.js';
 import { setupBackup } from './backup/backup.js';
 import { setupStockCheck } from './inventory/stock-check.js';
 import { setupCredits } from './credits/credits.js';
+import { setupCatalog } from './catalog/catalog.js';
 
 document.querySelectorAll('[data-integer]').forEach(setupIntegerInput);
 setupConnectionStatus();
 setupOffline();
 setupBackup();
 setupStockCheck();
+setupCatalog();
 
 const $ = selector => document.querySelector(selector);
 const form = $('#product-form');

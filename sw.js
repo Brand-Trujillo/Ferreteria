@@ -1,4 +1,4 @@
-const CACHE = 'cobos-shell-v7';
+const CACHE = 'cobos-shell-v8';
 const FILES = [
   './', './index.html', './manifest.webmanifest', './styles/app.css',
   './assets/icon.svg', './assets/icon-192.png', './assets/icon-512.png',
@@ -7,6 +7,7 @@ const FILES = [
   './src/sales/sales.js', './src/sales/storage.js', './src/reports/reports.js',
   './src/cash/cash.js', './src/cash/storage.js', './src/backup/backup.js',
   './src/credits/credits.js', './src/credits/storage.js',
+  './src/catalog/catalog.js',
   './src/common/numbers.js', './src/common/connection.js', './src/common/offline.js'
 ];
 
