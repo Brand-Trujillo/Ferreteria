@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14243a">
+  <meta name="description" content="Inventario para ferretería">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles/app.css">
+  <title>Ferretería · Inventario</title>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="#inicio"><span class="brand-icon">F</span><span>Mi ferretería<small>Tu negocio, bajo control</small></span></a>
+      <div class="sidebar-label">ESPACIO DE TRABAJO</div>
+      <a class="nav-active" href="#inventario"><span aria-hidden="true">▦</span> Inventario</a>
+      <div class="sidebar-bottom">Una herramienta hecha para tu negocio <span>✦</span></div>
+    </aside>
+    <main id="inicio">
+      <header class="topbar"><div><span class="eyebrow">TU ESPACIO DE TRABAJO</span><h1>Inventario</h1></div><div class="top-badge"><span></span> Primera versión</div></header>
+      <div class="content" id="inventario">
+        <div class="notice" role="note"><strong>Versión inicial · Datos de este dispositivo</strong><span>El inventario se guarda solo en este navegador. Aún no hay sincronización, usuarios ni copias de seguridad; no lo uses como registro único del negocio.</span></div>
+        <section class="hero">
+          <div><span class="hero-kicker">TU INVENTARIO, MÁS SIMPLE</span><h2>Todo en su lugar.<br><em>Tu negocio en marcha.</em></h2><p>Encuentra tus productos, revisa existencias y mantén todo organizado desde un solo lugar.</p><button class="button button-light" id="new-product" type="button"><span>＋</span> Agregar producto</button></div>
+          <div class="hero-art" aria-hidden="true"><div class="art-box art-box-back">✦</div><div class="art-box art-box-front">▦<small>TODO EN ORDEN</small></div><div class="art-dot">✓</div></div>
+        </section>
+        <section class="stats" aria-label="Resumen del inventario">
+          <article class="stat"><span class="stat-icon blue">▦</span><div><span>Productos registrados</span><strong id="total-products">0</strong><small>En tu inventario</small></div></article>
+          <article class="stat"><span class="stat-icon orange">↘</span><div><span>Stock bajo</span><strong id="low-products">0</strong><small>Para revisar pronto</small></div></article>
+          <article class="stat"><span class="stat-icon red">!</span><div><span>Agotados</span><strong id="empty-products">0</strong><small>Sin unidades disponibles</small></div></article>
+        </section>
+        <section class="inventory-panel">
+          <div class="section-heading"><div><span class="eyebrow">ORGANIZA TU NEGOCIO</span><h2>Tus productos</h2><p>Busca, consulta y actualiza tu inventario.</p></div><button class="button button-primary" id="new-product-secondary" type="button">＋ <span>Agregar producto</span></button></div>
+          <div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar por nombre o código..." autocomplete="off" aria-label="Buscar por nombre o código"></label><button class="button button-outline" id="scan-search" type="button">▥ <span>Escanear código</span></button><select id="filter" aria-label="Filtrar productos"><option value="all">Todos los productos</option><option value="low">Stock bajo</option><option value="empty">Agotados</option></select></div>
+          <div class="product-list" id="product-list" aria-live="polite"></div>
+        </section>
+      </div>
+      <footer>Hecho para que tu negocio siga creciendo <span>✦</span></footer>
+    </main>
+  </div>
+  <dialog id="product-dialog">
+    <form id="product-form">
+      <div class="dialog-heading"><div><span class="eyebrow">INVENTARIO</span><h2 id="form-title">Agregar producto</h2></div><button class="icon-button" type="button" data-close="product-dialog" aria-label="Cerrar">×</button></div>
+      <p class="form-intro">Completa los datos para mantener tu inventario al día.</p>
+      <div class="form-grid">
+        <label class="wide">Nombre del producto <input name="name" required maxlength="120" placeholder="Ej. Martillo de acero"></label>
+        <label class="wide">Código de barras <span class="input-action"><input name="barcode" maxlength="80" placeholder="Escribe, escanea o deja vacío" autocomplete="off"><button type="button" id="scan-product" aria-label="Escanear código de barras">▥</button></span><small>Opcional. No se permiten códigos repetidos.</small></label>
+        <label>Precio de compra <span class="money-input"><span>$</span><input name="cost" type="number" min="0" max="999999999999" step="1" required inputmode="numeric" placeholder="0"></span></label>
+        <label>Precio de venta <span class="money-input"><span>$</span><input name="price" type="number" min="0" max="999999999999" step="1" required inputmode="numeric" placeholder="0"></span></label>
+        <label>Cantidad en stock <input name="stock" type="number" min="0" max="999999999" step="1" required inputmode="numeric" placeholder="0"></label>
+        <label>Stock mínimo <input name="minimum" type="number" min="0" max="999999999" step="1" required inputmode="numeric" placeholder="0"></label>
+        <label class="wide">Proveedor <input name="supplier" maxlength="120" placeholder="Opcional"></label>
+        <label class="wide" id="reason-field" hidden>Motivo del cambio de stock <input name="reason" maxlength="200" placeholder="Ej. Llegó mercancía"></label>
+      </div>
+      <p id="form-error" class="error" role="alert"></p>
+      <div class="form-actions"><button class="button button-outline" type="button" data-close="product-dialog">Cancelar</button><button class="button button-primary" type="submit">Guardar producto</button></div>
+    </form>
+  </dialog>
+  <dialog id="scanner-dialog">
+    <div class="dialog-heading"><div><span class="eyebrow">LECTOR DE CÓDIGO</span><h2>Escanear producto</h2></div><button class="icon-button" type="button" data-close="scanner-dialog" aria-label="Cerrar">×</button></div>
+    <p class="form-intro">Apunta la cámara hacia el código de barras.</p>
+    <video id="scanner-video" playsinline muted></video>
+    <p id="scanner-message" role="status"></p>
+    <button class="button button-outline" type="button" data-close="scanner-dialog">Cerrar cámara</button>
+  </dialog>
+  <dialog id="history-dialog">
+    <div class="dialog-heading"><div><span class="eyebrow">MOVIMIENTOS</span><h2>Historial de stock</h2></div><button class="icon-button" type="button" data-close="history-dialog" aria-label="Cerrar">×</button></div>
+    <div id="history-list"></div>
+    <button class="button button-outline" type="button" data-close="history-dialog">Cerrar</button>
+  </dialog>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
